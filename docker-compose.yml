@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+
+  psm-nats:
+    image: nats:2.1
+    container_name: psm-nats
+    ports:
+      - "4222:4222"
+    networks:
+      - physical-space-management
+
+  psm-redis:
+    image: redis
+    container_name: psm-redis
+    volumes:
+      - psm-redis:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - physical-space-management
+
+  psm-postgres:
+    image: postgres
+    restart: always
+    container_name: psm-postgres
+    environment:      
+      POSTGRES_USER: dbUser
+      POSTGRES_PASSWORD: dbPassword
+      POSTGRES_DB: dbDatabase            
+    ports:
+      - 5432:5432
+    volumes:
+      - psm-postgres:/var/lib/postgresql
+    networks:
+      - physical-space-management
+
+volumes:
+  psm-postgres:
+  psm-redis:
+
+networks:
+  physical-space-management:
+    name: physical-space-management
