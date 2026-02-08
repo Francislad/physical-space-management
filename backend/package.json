@@ -9,7 +9,7 @@
     "ci": "jest --watch",
     "test": "jest --coverage",
     "lint": "eslint services",
-    "dc:up": "docker-compose up --build -d",
+    "dc:up": "docker-compose up --build",
     "dc:logs": "docker-compose logs -f",
     "dc:down": "docker-compose down",
     "migrate:generate": "npx sequelize-cli migration:generate --name",
@@ -33,7 +33,9 @@
     "moleculer-repl": "^0.7.3"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.4",
+    "jsonwebtoken": "^9.0.3",
     "moleculer": "^0.14.26",
     "moleculer-db": "^0.8.20",
     "moleculer-db-adapter-sequelize": "^0.2.19",
