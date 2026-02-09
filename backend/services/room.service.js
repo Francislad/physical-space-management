@@ -62,6 +62,10 @@ module.exports = {
             async handler(ctx) {
                 const { name } = ctx.params;
                 const room = await this.adapter.findOne({ where: { name } });
+                if (!room) {
+                    throw new MoleculerClientError("Room not found", 404, "ROOM_NOT_FOUND");
+                }
+
                 const checkins = await ctx.call("checkins.listAllCheckinsByRoom", { room: name });
 
                 return {
