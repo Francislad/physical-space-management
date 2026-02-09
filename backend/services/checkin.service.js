@@ -151,9 +151,24 @@ module.exports = {
             },
             async handler(ctx) {
                 const { room } = ctx.params;
-                const user = ctx.meta.user;
                 return await this.adapter.find({query: {
                         room,
+                        checkedOutAt: null
+                    }});
+            }
+        },
+        getCurrentCheckinByUser: {
+            rest: {
+                method: "GET",
+                path: "/current",
+            },
+            auth: true,
+            roles: ["user"],
+            async handler(ctx) {
+                const { room } = ctx.params;
+                const user = ctx.meta.user;
+                return await this.adapter.find({query: {
+                        user: user.registerNumber,
                         checkedOutAt: null
                     }});
             }
