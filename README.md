@@ -268,7 +268,7 @@ backend/
 - Persistent check-in status in navbar
 
 ## Troubleshooting
-For troubleshooting, check the troubleshooting sections in the README of the backend or frontend.
+For troubleshooting, check the [Backend troubleshooting](./backend/README.md#troubleshooting) or the [Frontend troubleshooting](./frontend/README.md#troubleshooting).
 
 ## Challenge Constraints & Trade-offs
 
