@@ -6,7 +6,7 @@ services:
     build:
       context: .
     image: backend
-    env_file: .env
+    env_file: docker-compose.env
     environment:
       SERVICES: api
       PORT: 3000
@@ -15,21 +15,45 @@ services:
       - "traefik.http.routers.api-gw.rule=PathPrefix(`/`)"
       - "traefik.http.services.api-gw.loadbalancer.server.port=3000"
 
-  greeter:
-    build:
-      context: .
-    image: backend
-    env_file: .env
-    environment:
-      SERVICES: greeter
+  # greeter:
+  #   build:
+  #     context: .
+  #   image: backend
+  #   env_file: docker-compose.env
+  #   environment:
+  #     SERVICES: greeter
 
   users:
     build:
       context: .
     image: backend
-    env_file: .env
+    env_file: docker-compose.env
     environment:
       SERVICES: users
+
+  auth:
+    build:
+      context: .
+    image: backend
+    env_file: docker-compose.env
+    environment:
+      SERVICES: auth
+
+  checkins:
+    build:
+      context: .
+    image: backend
+    env_file: docker-compose.env
+    environment:
+      SERVICES: checkin
+
+  rooms:
+    build:
+      context: .
+    image: backend
+    env_file: docker-compose.env
+    environment:
+      SERVICES: room
 
   traefik:
     image: traefik:v2.4

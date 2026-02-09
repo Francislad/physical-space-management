@@ -4,10 +4,12 @@ const DbService = require('moleculer-db');
 const SqlAdapter = require('moleculer-db-adapter-sequelize');
 const Sequelize = require('sequelize');
 const bcrypt = require("bcryptjs");
+const AuthMixin = require("../mixins/auth.mixin");
+const { MoleculerClientError } = require("moleculer").Errors;
 
 module.exports = {
   name: 'users',
-  mixins: [DbService],
+  mixins: [DbService, AuthMixin],
   adapter: new SqlAdapter(
     process.env.DB_DATABASE,
     process.env.DB_USER,
@@ -59,24 +61,37 @@ module.exports = {
    * Actions
    */
   actions: {
+    get: false, // Disable default "get" action
+    remove: false,
+    update: false,
+
     getByRegisterNumber: {
+      rest: {
+        method: "GET",
+        path: "/:registerNumber",
+      },
       params: {
-        registerNumber: 'number',
+        registerNumber: 'string',
       },
       async handler(ctx) {
         const { registerNumber } = ctx.params;
-        return this.adapter.findOne({ where: { registerNumber } });
+        const user = await this.adapter.findOne({ where: { registerNumber } });
+
+        if (!user) {
+          throw new MoleculerClientError("User not found", 404, "USER_NOT_FOUND");
+        }
+
+        return user;
       }
     },
     /**
      * Create new user
      */
     create: {
-			rest: {
-				method: "POST",
-				path: "/",
-        authenticate: true
-			},
+      rest: {
+        method: "POST",
+        path: "/",
+      },
       auth: true,
       roles: ["admin"], // Only admins can create users
       params: {
@@ -100,6 +115,88 @@ module.exports = {
         // Don't return password hash
         const { password_hash: _, ...userWithoutPassword } = user.toJSON();
         return userWithoutPassword;
+      }
+    },
+    /**
+     * List all users
+     */
+    list: {
+      rest: {
+        method: "GET",
+        path: "/",
+      },
+      auth: true,
+      roles: ["admin"],
+      async handler(ctx) {
+        const users = await this.adapter.find();
+        return users.map(user => {
+          const { password: _, ...userWithoutPassword } = user.toJSON();
+          return userWithoutPassword;
+        });
+      }
+    },
+
+    /**
+     * Update user
+     */
+    updateUser: {
+      rest: {
+        method: "PUT",
+        path: "/",
+      },
+      auth: true,
+      roles: ["admin"],
+      params: {
+        registerNumber: "number",
+        password: { type: "string", optional: true },
+        name: { type: "string", optional: true }
+      },
+      async handler(ctx) {
+        const { registerNumber, ...updateData } = ctx.params;
+
+        const user = await this.adapter.findOne({ where: { registerNumber } });
+
+        if (!user) {
+          throw new MoleculerClientError("User not found", 404, "USER_NOT_FOUND");
+        }
+
+        await user.update({registerNumber, ...updateData});
+
+        const { password: _, ...userWithoutPassword } = user.toJSON();
+        return userWithoutPassword;
+      }
+    },
+    /**
+     * Delete user
+     */
+    delete: {
+      rest: {
+        method: "DELETE",
+        path: "/",
+      },
+      auth: true,
+      roles: ["admin"],
+      params: {
+        registerNumber: "number"
+      },
+      async handler(ctx) {
+        const user = await this.adapter.findOne({ where: { registerNumber: ctx.params.registerNumber } });
+
+        if (!user) {
+          throw new MoleculerClientError("User not found", 404, "USER_NOT_FOUND");
+        }
+
+        // Prevent deleting admin users
+        if (user.role === "admin") {
+          throw new MoleculerClientError(
+            "Cannot delete admin users",
+            403,
+            "CANNOT_DELETE_ADMIN"
+          );
+        }
+
+        await user.destroy();
+        return { success: true };
       }
     },
   },

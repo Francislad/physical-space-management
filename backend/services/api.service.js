@@ -1,7 +1,6 @@
 "use strict";
 
 const ApiGateway = require("moleculer-web");
-const AuthMixin = require("../mixins/auth.mixin");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -13,7 +12,7 @@ const AuthMixin = require("../mixins/auth.mixin");
 
 module.exports = {
 	name: "api",
-	mixins: [ApiGateway, AuthMixin],
+	mixins: [ApiGateway],
 
 	/** @type {ApiSettingsSchema} More info about settings: https://moleculer.services/docs/0.14/moleculer-web.html */
 	settings: {
@@ -31,7 +30,7 @@ module.exports = {
 				path: "/api",
 
 				whitelist: [
-					"**"
+					"**",
 				],
 
 				// Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
@@ -51,7 +50,6 @@ module.exports = {
 				autoAliases: true,
 
 				aliases: {
-
 				},
 
 				/**
@@ -62,10 +60,11 @@ module.exports = {
 				 * @param {ServerResponse} res
 				 * @param {Object} data
 				 *
+				 * */
 				onBeforeCall(ctx, route, req, res) {
 					// Set request headers to context meta
-					ctx.meta.userAgent = req.headers["user-agent"];
-				}, */
+					ctx.meta.authHeader = req.headers["authorization"];
+				}, 
 
 				/**
 				 * After call hook. You can modify the data.

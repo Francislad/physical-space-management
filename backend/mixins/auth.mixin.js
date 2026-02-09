@@ -128,63 +128,6 @@ module.exports = {
         },
 
         /**
-         * Authenticate request and extract user
-         * @param {Context} ctx - Moleculer context
-         * @returns {Object} Authenticated user
-         */
-        async authenticate(ctx, route, req) {
-            const action = ctx.action;
-            // Read the token from header
-            const authHeader = req.headers["authorization"];
-
-            if (!authHeader) {
-                throw new MoleculerClientError(
-                    "No authorization token provided",
-                    401,
-                    "NO_TOKEN"
-                );
-            }
-
-            const token = this.extractToken(authHeader);
-
-            if (!token) {
-                throw new MoleculerClientError(
-                    "Invalid authorization header format",
-                    401,
-                    "INVALID_HEADER"
-                );
-            }
-
-            // Verify and decode token
-            // And then store user in context metadata for access in actions
-            ctx.meta.user = this.verifyToken(token);
-
-            // Optionally: Verify user still exists in database
-            // This is useful if you want to invalidate tokens when user is deleted
-            if (ctx.meta.user.id) {
-                const user = await ctx.call("users.get", { id: ctx.meta.user.id });
-
-                if (!user) {
-                    throw new MoleculerClientError(
-                        "User not found",
-                        401,
-                        "USER_NOT_FOUND"
-                    );
-                }
-
-                ctx.meta.user = user;
-            }
-
-
-            // Check role-based authorization if specified
-            if (action.roles && action.roles.length > 0) {
-                this.authorize(ctx, action.roles);
-            }
-
-            this.logger.debug(`User authenticated: ${ctx.meta.user.id} (${ctx.meta.user.role})`);
-        },
-
-        /**
          * Authorize user based on roles
          * @param {Context} ctx - Moleculer context
          * @param {String|Array} requiredRoles - Required role(s)
@@ -209,6 +152,81 @@ module.exports = {
                     }
                 );
             }
-        }
+        },
     },
+
+
+    /**
+ * Service hooks
+ */
+    hooks: {
+        before: {
+            /**
+             * Global before hook to check authentication
+             * Runs before every action in services using this mixin
+             */
+            "*": async function authenticate(ctx) {
+                //console.log('GLOBAL AUTH HOOK');
+                const action = ctx.action;
+                // Skip authentication if action doesn't require it
+                if (!action.auth) {
+                    return;
+                }
+
+                if (!!ctx.meta.user) {
+                    // User already authenticated by a previous hook or action
+                    return;
+                }
+
+                // Read the token from header
+                const authHeader = ctx.meta.authHeader;
+                
+                if (!authHeader) {
+                    throw new MoleculerClientError(
+                        "No authorization token provided",
+                        401,
+                        "NO_TOKEN"
+                    );
+                }
+
+                const token = this.extractToken(authHeader);
+
+                if (!token) {
+                    throw new MoleculerClientError(
+                        "Invalid authorization header format",
+                        401,
+                        "INVALID_HEADER"
+                    );
+                }
+
+                // Verify and decode token
+                // And then store user in context metadata for access in actions
+                ctx.meta.user = this.verifyToken(token);
+
+                // Optionally: Verify user still exists in database
+                // This is useful if you want to invalidate tokens when user is deleted
+                if (ctx.meta.user.id) {
+                    const user = await ctx.call("users.get", { id: ctx.meta.user.id });
+
+                    if (!user) {
+                        throw new MoleculerClientError(
+                            "User not found",
+                            401,
+                            "USER_NOT_FOUND"
+                        );
+                    }
+
+                    ctx.meta.user = user;
+                }
+
+
+                // Check role-based authorization if specified
+                if (action.roles && action.roles.length > 0) {
+                    this.authorize(ctx, action.roles);
+                }
+
+                this.logger.debug(`User authenticated: ${ctx.meta.user.id} (${ctx.meta.user.role})`);
+            }
+        }
+    }
 };
