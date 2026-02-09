@@ -1,10 +1,11 @@
 const AuthMixin = require("../mixins/auth.mixin");
 const bcrypt = require("bcryptjs");
+const { methods } = require("./users.service");
 const { MoleculerClientError } = require("moleculer").Errors;
 
 module.exports = {
     name: "auth",
-    
+
     mixins: [AuthMixin],
 
     actions: {
@@ -12,10 +13,10 @@ module.exports = {
          * Login - no auth required
          */
         login: {
-			rest: {
-				method: "POST",
-				path: "/login"
-			},
+            rest: {
+                method: "POST",
+                path: "/login"
+            },
             params: {
                 registerNumber: "number",
                 password: "string"
@@ -24,7 +25,7 @@ module.exports = {
                 const { registerNumber, password } = ctx.params;
 
                 // Find user
-                const user = await ctx.call("users.getByRegisterNumber", {registerNumber});
+                const user = await ctx.call("users.getByRegisterNumber", { registerNumber: `${registerNumber}` });
 
                 if (!user) {
                     throw new MoleculerClientError(

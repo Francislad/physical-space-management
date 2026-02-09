@@ -20,7 +20,8 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dc:up": "docker-compose up -d",
+    "dc:down": "docker-compose down"
   },
   "dependencies": {
     "moleculer-cli": "^0.8.2"

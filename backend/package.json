@@ -9,7 +9,7 @@
     "ci": "jest --watch",
     "test": "jest --coverage",
     "lint": "eslint services",
-    "dc:up": "docker-compose up --build",
+    "dc:up": "docker-compose up -d --build",
     "dc:logs": "docker-compose logs -f",
     "dc:down": "docker-compose down",
     "migrate:generate": "npx sequelize-cli migration:generate --name",
@@ -19,6 +19,7 @@
     "seed:generate": "npx sequelize-cli seed:generate --name",
     "seed:up": "npx sequelize-cli db:seed:all",
     "seed:down": "npx sequelize-cli db:seed:undo",
+    "seed:down:all": "npx sequelize-cli db:seed:undo:all",
     "model:generate": "npx sequelize-cli model:generate --name"
   },
   "keywords": [
