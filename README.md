@@ -23,7 +23,11 @@ npm run dc:up
 ```
 
 ### Backend
-At the backend folder, create a `.env` file and populate it. You can find more about it in the backend's README or use the .env.example. Then, run the migrations
+At the backend folder, create a `.env` file and populate it. You can find more about it in the backend's README or use the .env.example. Then, install packages
+```bash
+npm install
+```
+Run the migrations
 ```bash
 npm run migrate:up
 ```
