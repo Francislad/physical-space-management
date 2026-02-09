@@ -25,6 +25,16 @@ module.exports = {
 		// Global Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
 		use: [],
 
+		// Global CORS settings for all routes
+		cors: {
+			origin: "*", // Use "*" to allow all origins, or specify a list: ["http://localhost:3000", "http://yourfrontend.com"]
+			methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+			allowedHeaders: '*', // Allowed custom headers (e.g., "Authorization", "Content-Type")
+			exposedHeaders: [],
+			credentials: false,
+			maxAge: 600, // Max age for preflight cache
+		},
+
 		routes: [
 			{
 				path: "/api",
@@ -64,7 +74,7 @@ module.exports = {
 				onBeforeCall(ctx, route, req, res) {
 					// Set request headers to context meta
 					ctx.meta.authHeader = req.headers["authorization"];
-				}, 
+				},
 
 				/**
 				 * After call hook. You can modify the data.

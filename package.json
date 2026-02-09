@@ -21,7 +21,8 @@
   "main": "index.js",
   "scripts": {
     "dc:up": "docker-compose up -d",
-    "dc:down": "docker-compose down"
+    "dc:down": "docker-compose down",
+    "dc:down:rmi": "docker-compose down -v"
   },
   "dependencies": {
     "moleculer-cli": "^0.8.2"
